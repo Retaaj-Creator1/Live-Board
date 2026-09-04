@@ -15,17 +15,21 @@ import {
   horizontalListSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { Palette, Plus, RotateCcw, Search, X } from "lucide-react";
+import { Cloud, CloudOff, LogOut, Palette, Plus, RotateCcw, Search, UserRound, X } from "lucide-react";
 import { useBoard } from "@/hooks/useBoard";
+import { useAuth } from "@/hooks/useAuth";
 import { findColumnOfCard, matchesQuery } from "@/lib/board";
 import { BoardColumn } from "./BoardColumn";
 import { CardDialog } from "./CardDialog";
 import { BoardSettingsDialog } from "./BoardSettingsDialog";
+import { AuthDialog } from "./AuthDialog";
 import { boardTheme, themeStyle } from "@/lib/theme";
 
 export function Board() {
-  const board = useBoard();
+  const auth = useAuth();
+  const board = useBoard(auth.user?.id ?? null);
   const { state } = board;
+  const [authOpen, setAuthOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [newList, setNewList] = useState("");
   const [addingList, setAddingList] = useState(false);
@@ -95,10 +99,29 @@ export function Board() {
         <div className="mx-auto flex max-w-[110rem] flex-wrap items-center gap-4">
           <div>
             <h1 className="font-semibold text-2xl tracking-tight">{state.name}</h1>
-            <p className="text-sm text-muted-foreground">
-              {query
-                ? `${matching} of ${total} cards match "${query}"`
-                : `${total} cards across ${state.columns.length} lists · saved on this device`}
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              {query ? (
+                <span>
+                  {matching} of {total} cards match "{query}"
+                </span>
+              ) : (
+                <span>
+                  {total} cards across {state.columns.length} lists ·{" "}
+                  {auth.user ? (
+                    board.syncError ? (
+                      <span className="inline-flex items-center gap-1 text-destructive">
+                        <CloudOff className="h-3.5 w-3.5" /> {board.syncError}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1">
+                        <Cloud className="h-3.5 w-3.5" /> synced to your account
+                      </span>
+                    )
+                  ) : (
+                    <span>saved on this device</span>
+                  )}
+                </span>
+              )}
             </p>
           </div>
 
@@ -136,6 +159,22 @@ export function Board() {
             >
               <RotateCcw className="h-4 w-4" /> Reset
             </button>
+            {auth.user === undefined ? null : auth.user ? (
+              <button
+                onClick={() => void auth.signOut()}
+                title={`Signed in as ${auth.user.email}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <LogOut className="h-4 w-4" /> {auth.user.name}
+              </button>
+            ) : (
+              <button
+                onClick={() => setAuthOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <UserRound className="h-4 w-4" /> Sign in
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -247,6 +286,13 @@ export function Board() {
         labels={state.labels}
         onChange={board.updateSettings}
         onReset={board.resetSettings}
+      />
+
+      <AuthDialog
+        open={authOpen}
+        onOpenChange={setAuthOpen}
+        onSignIn={auth.signIn}
+        onSignUp={auth.signUp}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DEFAULT_LABELS,
   createInitialBoard,
@@ -15,10 +15,15 @@ import {
   DEFAULT_SETTINGS,
 } from "@/lib/board";
 import { deleteFile, putFile } from "@/lib/attachments";
+import { fetchBoard, saveBoardToCloud } from "@/lib/board-sync";
 
-export function useBoard() {
+const SYNC_DEBOUNCE_MS = 1_500;
+
+export function useBoard(userId?: string | null) {
   const [state, setState] = useState<BoardState>(() => createInitialBoard());
   const [hydrated, setHydrated] = useState(false);
+  const [cloudSynced, setCloudSynced] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => {
     setState(loadBoard());
@@ -28,6 +33,47 @@ export function useBoard() {
   useEffect(() => {
     if (hydrated) saveBoard(state);
   }, [state, hydrated]);
+
+  // Pull cloud board when signed in (cloud wins over local on first load).
+  useEffect(() => {
+    if (!hydrated || !userId) {
+      setCloudSynced(false);
+      return;
+    }
+    let cancelled = false;
+    fetchBoard()
+      .then((res) => {
+        if (cancelled) return;
+        if (res.authenticated && res.state) {
+          setState(res.state);
+        }
+        setCloudSynced(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCloudSynced(true);
+          setSyncError("Could not load your board from the cloud");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, userId]);
+
+  // Push changes to the cloud (debounced).
+  const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!hydrated || !userId || !cloudSynced) return;
+    if (syncTimer.current) clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(() => {
+      saveBoardToCloud({ data: { state } })
+        .then(() => setSyncError(null))
+        .catch(() => setSyncError("Cloud sync failed — changes are still saved on this device"));
+    }, SYNC_DEBOUNCE_MS);
+    return () => {
+      if (syncTimer.current) clearTimeout(syncTimer.current);
+    };
+  }, [state, hydrated, userId, cloudSynced]);
 
   const addCard = useCallback((columnId: string, title: string) => {
     const trimmed = title.trim();
@@ -314,6 +360,8 @@ export function useBoard() {
   return {
     state,
     hydrated,
+    cloudSynced,
+    syncError,
     addCard,
     renameCard,
     updateCard,
