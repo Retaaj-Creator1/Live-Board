@@ -1,0 +1,7 @@
+{
+  "owner": "Retaaj-Creator1",
+  "repo": "Live-Board",
+  "path": ".github/workflows/mirror-to-tariqshaz.yml",
+  "message": "Add workflow to mirror pushes to tariqshaz/biz-tech-board",
+  "content": "name: Mirror to tariqshaz/biz-tech-board\n\non:\n  push:\n    branches: [ main ]\n\njobs:\n  mirror:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n        with:\n          fetch-depth: 0\n\n      - name: Push to tariqshaz repo\n        env:\n          TARGET_REPO: tariqshaz/biz-tech-board\n          TARGET_BRANCH: main\n        run: |\n          set -e\n          git config user.name \"github-actions[bot]\"\n          git config user.email \"actions@github.com\"\n\n          # Add the target remote using a PAT stored as TARGET_PAT secret\n          git remote add target \"https://x-access-token:${{ secrets.TARGET_PAT }}@github.com/${{ env.TARGET_REPO }}.git\"\n\n          # Push current HEAD to the target branch (non-forced). Will fail if histories diverge.\n          git push target HEAD:refs/heads/${{ env.TARGET_BRANCH }}\n"
+}
