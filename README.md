@@ -13,7 +13,7 @@ A free, open-source, Trello-like Kanban board built with React, TanStack Start, 
 - **Comments** — discuss cards with timestamped, editable comments
 - **Appearance settings** — choose board backgrounds, dialog themes, and label styles (Soft / Solid / Outline)
 - **Search** — find cards across the entire board by text or label
-- **Local persistence** — everything saves to your browser; close and reopen, your board is still there
+- **Local persistence** — everything saves to your browser; close and reopen, your board is still there.,
 
 ## Tech Stack
 
