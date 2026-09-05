@@ -14,7 +14,10 @@ function BoardSkeleton() {
       </div>
       <div className="mx-auto flex w-full max-w-[110rem] gap-4 px-6 py-6">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-64 w-[19rem] shrink-0 rounded-xl border border-border bg-secondary/40" />
+          <div
+            key={i}
+            className="h-64 w-[19rem] shrink-0 rounded-xl border border-border bg-secondary/40"
+          />
         ))}
       </div>
     </div>

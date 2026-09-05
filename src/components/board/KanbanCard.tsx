@@ -23,11 +23,19 @@ type Props = {
   card: Card;
   boardLabels: Label[];
   labelStyle?: LabelStyle;
+  assigneeCount?: number;
   onOpen: () => void;
   onDelete: () => void;
 };
 
-export function KanbanCard({ card, boardLabels, labelStyle = "soft", onOpen, onDelete }: Props) {
+export function KanbanCard({
+  card,
+  boardLabels,
+  labelStyle = "soft",
+  assigneeCount = 0,
+  onOpen,
+  onDelete,
+}: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id,
     data: { type: "card" },
@@ -106,6 +114,21 @@ export function KanbanCard({ card, boardLabels, labelStyle = "soft", onOpen, onD
               {(card.comments ?? []).length > 0 && (
                 <span className="inline-flex items-center gap-1">
                   <MessageSquare className="h-3 w-3" /> {(card.comments ?? []).length}
+                </span>
+              )}
+              {assigneeCount > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <div className="flex -space-x-1">
+                    {Array.from({ length: Math.min(assigneeCount, 3) }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-4 w-4 rounded-full border border-card bg-primary/30"
+                      />
+                    ))}
+                  </div>
+                  {assigneeCount > 3 && (
+                    <span className="text-[0.65rem]">+{assigneeCount - 3}</span>
+                  )}
                 </span>
               )}
             </div>

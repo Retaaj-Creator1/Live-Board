@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Check, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import type { Comment } from "@/lib/board";
+import { useMembers } from "@/hooks/useMembers";
+import { extractMentionIds } from "@/lib/realtime";
+import { MentionInput } from "./MentionInput";
 
 type Props = {
   comments: Comment[];
-  onAdd: (text: string) => void;
+  workspaceId?: string | null;
+  onAdd: (text: string, mentions?: string[]) => void;
   onUpdate: (commentId: string, text: string) => void;
   onRemove: (commentId: string) => void;
 };
@@ -19,14 +23,16 @@ function when(iso: string) {
   });
 }
 
-export function CommentSection({ comments, onAdd, onUpdate, onRemove }: Props) {
+export function CommentSection({ comments, workspaceId, onAdd, onUpdate, onRemove }: Props) {
+  const { members } = useMembers(workspaceId ?? null);
   const [draft, setDraft] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
 
-  const submit = () => {
-    if (!draft.trim()) return;
-    onAdd(draft);
+  const submit = (draftText: string) => {
+    const trimmed = draftText.trim();
+    if (!trimmed) return;
+    onAdd(trimmed, extractMentionIds(trimmed, members));
     setDraft("");
   };
 
@@ -40,26 +46,22 @@ export function CommentSection({ comments, onAdd, onUpdate, onRemove }: Props) {
       </h3>
 
       <div className="space-y-2">
-        <textarea
-          rows={2}
+        <MentionInput
+          workspaceId={workspaceId ?? null}
           value={draft}
-          placeholder="Write a comment…"
-          aria-label="New comment"
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit();
-          }}
-          className="w-full resize-none rounded-lg border border-border bg-input/40 p-3 text-sm outline-none placeholder:text-muted-foreground focus:border-ring"
+          onChange={setDraft}
+          onSubmit={submit}
+          placeholder="Write a comment… use @ to mention"
         />
         <div className="flex items-center gap-2">
           <button
-            onClick={submit}
+            onClick={() => submit(draft)}
             disabled={!draft.trim()}
             className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-opacity hover:bg-primary/90 disabled:opacity-40"
           >
             Comment
           </button>
-          <span className="text-xs text-muted-foreground">⌘/Ctrl + Enter to post</span>
+          <span className="text-xs text-muted-foreground">Enter to post, @ to mention</span>
         </div>
       </div>
 

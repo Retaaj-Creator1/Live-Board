@@ -157,10 +157,7 @@ export function LabelPicker({
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <ColorRow
-                  value={label.color}
-                  onChange={(color) => onUpdate(label.id, { color })}
-                />
+                <ColorRow value={label.color} onChange={(color) => onUpdate(label.id, { color })} />
               </li>
             ))}
           </ul>

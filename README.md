@@ -1,8 +1,8 @@
-# Flow Board
+# OpenBoard
 
-A free, open-source, Trello-like Kanban board built with React, TanStack Start, Tailwind CSS, and dnd-kit. Drag-and-drop cards, custom labels, due dates, checklists, file attachments, comments, and themeable appearance — all running locally in your browser with on-device persistence.
+A free, open-source, Trello-like Kanban board built with React, TanStack Start, Tailwind CSS, and dnd-kit. Drag-and-drop cards, custom labels, due dates, checklists, file attachments, comments, and themeable appearance — all running locally in your browser with on-device persistence. Optional cloud sync with Neon Postgres + Better Auth.
 
-![Flow Board](https://biz-tech-board.lovable.app)
+![OpenBoard](https://biz-tech-board.lovable.app)
 
 ## Features
 
@@ -13,18 +13,21 @@ A free, open-source, Trello-like Kanban board built with React, TanStack Start, 
 - **Comments** — discuss cards with timestamped, editable comments
 - **Appearance settings** — choose board backgrounds, dialog themes, and label styles (Soft / Solid / Outline)
 - **Search** — find cards across the entire board by text or label
-- **Local persistence** — everything saves to your browser; close and reopen, your board is still there, new commit
+- **Local persistence** — everything saves to your browser; close and reopen, your board is still there
+- **Cloud sync** — sign in with email/password to sync your boards across devices (Neon Postgres + Better Auth)
+- **Workspaces** — organize boards into workspaces with role-based access (owner/admin/member/guest)
+- **PWA support** — installable, works offline via service worker
 
 ## Tech Stack
 
-| Layer       | Technology                          |
-| ----------- | ----------------------------------- |
-| Framework   | TanStack Start v1 (React 19, SSR)   |
-| Styling     | Tailwind CSS v4                      |
-| Drag & drop | @dnd-kit/core, @dnd-kit/sortable     |
-| Storage     | localStorage + IndexedDB            |
-| Build       | Vite 7                              |
-| Deploy      | Cloudflare Workers (Edge)           |
+| Layer       | Technology                        |
+| ----------- | --------------------------------- |
+| Framework   | TanStack Start v1 (React 19, SSR) |
+| Styling     | Tailwind CSS v4                   |
+| Drag & drop | @dnd-kit/core, @dnd-kit/sortable  |
+| Storage     | localStorage + IndexedDB          |
+| Build       | Vite 7                            |
+| Deploy      | Cloudflare Workers (Edge)         |
 
 ## Quick Start
 
@@ -43,12 +46,12 @@ Open the local URL shown in your terminal.
 - [x] M2 — Card system (labels, due dates, checklists, search)
 - [x] Custom labels & file attachments
 - [x] Appearance settings & comments
-- [ ] M3 — Cloud sync (Postgres + Auth)
-- [ ] M4 — Workspaces & roles
-- [ ] M5 — Real-time collaboration
-- [ ] M6 — Table & calendar views
+- [x] M3 — Cloud sync (Neon Postgres + Better Auth)
+- [x] M4 — Workspaces & roles (schema + workspace switcher + membership tables)
+- [x] M5 — Real-time collaboration (activity feed, notifications, assignees, @mentions)
+- [x] M6 — Table & calendar views (kanban/table/calendar switcher)
+- [x] M8 — PWA & offline sync (manifest + service worker)
 - [ ] M7 — AI-assisted task creation
-- [ ] M8 — PWA & offline sync
 - [ ] M9 — Distributable desktop app (Electron `.exe`)
 
 See [`docs/`](./docs) and the in-project plan for details.

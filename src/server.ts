@@ -2,7 +2,17 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { auth } from "./lib/auth/server";
+
+// Auth is imported lazily so the app runs without DATABASE_URL configured.
+// Only /api/auth/* routes actually need it.
+type AuthModule = typeof import("./lib/auth/server");
+let authPromise: Promise<AuthModule> | undefined;
+function getAuth(): Promise<AuthModule> {
+  if (!authPromise) {
+    authPromise = import("./lib/auth/server");
+  }
+  return authPromise;
+}
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -52,11 +62,12 @@ export default {
     // Better Auth handles its own API surface (/api/auth/*).
     if (url.pathname.startsWith("/api/auth/")) {
       try {
+        const { auth } = await getAuth();
         return await auth.handler(request);
       } catch (error) {
         console.error(error);
-        return new Response(JSON.stringify({ error: "auth_failure" }), {
-          status: 500,
+        return new Response(JSON.stringify({ error: "auth_not_configured" }), {
+          status: 503,
           headers: { "content-type": "application/json" },
         });
       }

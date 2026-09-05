@@ -77,14 +77,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "OpenBoard — Your own Kanban board" },
+      {
+        name: "description",
+        content:
+          "A fast, free Kanban board: create lists, add cards, drag them between columns, and everything stays saved on your device.",
+      },
+      { property: "og:title", content: "OpenBoard — Your own Kanban board" },
+      {
+        property: "og:description",
+        content:
+          "Create lists, add cards, drag and drop between columns. A self-owned alternative to Trello.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -98,6 +104,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icon-192.png" },
+      { rel: "theme-color", content: "#0c0a09" },
     ],
   }),
 
@@ -123,6 +132,19 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Register service worker for offline support.
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+    const register = async () => {
+      try {
+        await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      } catch {
+        /* SW registration failed — app still works online */
+      }
+    };
+    void register();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

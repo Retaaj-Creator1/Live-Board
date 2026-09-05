@@ -56,7 +56,9 @@ export function BoardColumn({
     setDraft("");
   };
 
-  const visible = column.cardIds.filter((id) => cards[id] && matchesQuery(cards[id]!, boardLabels, query));
+  const visible = column.cardIds.filter(
+    (id) => cards[id] && matchesQuery(cards[id]!, boardLabels, query),
+  );
   const hidden = column.cardIds.length - visible.length;
 
   return (
@@ -84,7 +86,11 @@ export function BoardColumn({
             value={titleDraft}
             onChange={(e) => setTitleDraft(e.target.value)}
             onBlur={() => {
-              onRenameColumn(titleDraft);
+              if (titleDraft.trim()) {
+                onRenameColumn(titleDraft.trim());
+              } else {
+                setTitleDraft(column.title);
+              }
               setEditingTitle(false);
             }}
             onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
@@ -121,6 +127,7 @@ export function BoardColumn({
               card={cards[id]!}
               boardLabels={boardLabels}
               labelStyle={labelStyle}
+              assigneeCount={(cards[id]!.assigneeIds ?? []).length}
               onOpen={() => onOpenCard(id)}
               onDelete={() => onDeleteCard(id)}
             />

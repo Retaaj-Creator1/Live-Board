@@ -29,9 +29,7 @@ export function AuthDialog({ open, onOpenChange, onSignIn, onSignUp }: Props) {
     setBusy(true);
     try {
       const err =
-        mode === "signin"
-          ? await onSignIn(email, password)
-          : await onSignUp(name, email, password);
+        mode === "signin" ? await onSignIn(email, password) : await onSignUp(name, email, password);
       if (err) {
         setError(err);
       } else {
@@ -110,9 +108,7 @@ export function AuthDialog({ open, onOpenChange, onSignIn, onSignUp }: Props) {
           }}
           className="text-xs text-muted-foreground hover:text-foreground"
         >
-          {mode === "signin"
-            ? "No account yet? Create one"
-            : "Already have an account? Sign in"}
+          {mode === "signin" ? "No account yet? Create one" : "Already have an account? Sign in"}
         </button>
       </DialogContent>
     </Dialog>

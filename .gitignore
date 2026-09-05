@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 dist
+electron-build
+build
 .env
 .env.*
 !.env.example
@@ -22,6 +24,9 @@ dist-ssr
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+
+# Drizzle migrations
+/drizzle
 
 # Editor directories and files
 .vscode/*

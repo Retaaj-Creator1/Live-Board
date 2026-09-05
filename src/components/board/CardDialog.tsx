@@ -19,12 +19,15 @@ import { dialogTheme } from "@/lib/theme";
 import { LabelPicker } from "./LabelPicker";
 import { AttachmentList } from "./AttachmentList";
 import { CommentSection } from "./CommentSection";
+import { AssigneePicker } from "./AssigneePicker";
+import { AiChecklistButton } from "./AiChecklistButton";
 
 type Props = {
   card: Card | null;
   columnTitle?: string;
   labels: Label[];
   settings: BoardSettings;
+  workspaceId?: string | null;
   onClose: () => void;
   onUpdate: (patch: Partial<Omit<Card, "id">>) => void;
   onToggleLabel: (label: string) => void;
@@ -36,7 +39,7 @@ type Props = {
   onAddChecklistItem: (text: string) => void;
   onToggleChecklistItem: (itemId: string) => void;
   onRemoveChecklistItem: (itemId: string) => void;
-  onAddComment: (text: string) => void;
+  onAddComment: (text: string, mentions?: string[]) => void;
   onUpdateComment: (commentId: string, text: string) => void;
   onRemoveComment: (commentId: string) => void;
   onDelete: () => void;
@@ -47,6 +50,7 @@ export function CardDialog({
   columnTitle,
   labels,
   settings,
+  workspaceId,
   onClose,
   onUpdate,
   onToggleLabel,
@@ -73,7 +77,10 @@ export function CardDialog({
       setDescription(card.description ?? "");
       setItem("");
     }
-  }, [card?.id]);
+    // Intentionally keyed on the card's identity only: resets edits when the
+    // dialog switches cards, but keeps in-progress edits while other fields
+    // change (labels, checklist…) re-create the same card object.
+  }, [card?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!card) return null;
   const progress = checklistProgress(card);
@@ -94,7 +101,13 @@ export function CardDialog({
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onBlur={() => title.trim() && onUpdate({ title: title.trim() })}
+            onBlur={() => {
+              if (title.trim()) {
+                onUpdate({ title: title.trim() });
+              } else {
+                setTitle(card.title);
+              }
+            }}
             onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
             aria-label="Card title"
             className="w-full bg-transparent pr-8 text-left font-semibold text-lg tracking-tight outline-none"
@@ -146,7 +159,10 @@ export function CardDialog({
             value={description}
             placeholder="Add more detail…"
             onChange={(e) => setDescription(e.target.value)}
-            onBlur={() => onUpdate({ description })}
+            onBlur={() => {
+              const next = description.trim();
+              if (next !== (card.description ?? "")) onUpdate({ description: next });
+            }}
             className="w-full resize-none rounded-lg border border-border bg-input/40 p-3 text-sm outline-none placeholder:text-muted-foreground focus:border-ring"
           />
         </section>
@@ -182,10 +198,7 @@ export function CardDialog({
                   aria-label={i.text}
                 />
                 <span
-                  className={cn(
-                    "flex-1 text-sm",
-                    i.done && "text-muted-foreground line-through",
-                  )}
+                  className={cn("flex-1 text-sm", i.done && "text-muted-foreground line-through")}
                 >
                   {i.text}
                 </span>
@@ -222,10 +235,27 @@ export function CardDialog({
               <Plus className="h-3.5 w-3.5" /> Add
             </button>
           </div>
+          <AiChecklistButton
+            cardTitle={card.title}
+            cardDescription={card.description}
+            onAddItems={(items) => items.forEach((text) => onAddChecklistItem(text))}
+          />
+        </section>
+
+        <section className="space-y-2">
+          <h3 className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            Assignees
+          </h3>
+          <AssigneePicker
+            workspaceId={workspaceId ?? null}
+            selectedIds={card.assigneeIds ?? []}
+            onChange={(ids) => onUpdate({ assigneeIds: ids })}
+          />
         </section>
 
         <CommentSection
           comments={card.comments ?? []}
+          workspaceId={workspaceId ?? null}
           onAdd={onAddComment}
           onUpdate={onUpdateComment}
           onRemove={onRemoveComment}

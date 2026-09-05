@@ -2,15 +2,7 @@ import type { LabelStyle } from "./theme";
 
 export type LabelId = string;
 
-export type LabelColor =
-  | "amber"
-  | "red"
-  | "teal"
-  | "blue"
-  | "violet"
-  | "green"
-  | "pink"
-  | "slate";
+export type LabelColor = "amber" | "red" | "teal" | "blue" | "violet" | "green" | "pink" | "slate";
 
 export const LABEL_COLORS: Array<{
   id: LabelColor;
@@ -121,7 +113,9 @@ export type ChecklistItem = {
 export type Comment = {
   id: string;
   author: string;
+  authorId?: string;
   text: string;
+  mentions?: string[];
   createdAt: string;
 };
 
@@ -139,6 +133,7 @@ export type Card = {
   description?: string;
   labels?: LabelId[];
   dueDate?: string | null;
+  assigneeIds?: string[];
   checklist?: ChecklistItem[];
   attachments?: Attachment[];
   comments?: Comment[];
@@ -222,6 +217,7 @@ function normalizeCard(card: Card): Card {
     description: card.description ?? "",
     labels: Array.isArray(card.labels) ? card.labels : [],
     dueDate: card.dueDate ?? null,
+    assigneeIds: Array.isArray(card.assigneeIds) ? card.assigneeIds : [],
     checklist: Array.isArray(card.checklist) ? card.checklist : [],
     attachments: Array.isArray(card.attachments) ? card.attachments : [],
     comments: Array.isArray(card.comments) ? card.comments : [],

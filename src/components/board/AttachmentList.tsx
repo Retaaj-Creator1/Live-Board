@@ -3,13 +3,7 @@ import { Download, FileText, Loader2, Paperclip, Trash2 } from "lucide-react";
 import { formatBytes, type Attachment } from "@/lib/board";
 import { MAX_FILE_BYTES, getFileUrl } from "@/lib/attachments";
 
-function AttachmentRow({
-  attachment,
-  onRemove,
-}: {
-  attachment: Attachment;
-  onRemove: () => void;
-}) {
+function AttachmentRow({ attachment, onRemove }: { attachment: Attachment; onRemove: () => void }) {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
