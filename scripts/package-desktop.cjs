@@ -48,10 +48,12 @@ async function main() {
     ["electron/main.cjs", "electron/main.cjs"],
     ["electron/preload.js", "electron/preload.js"],
     ["electron/icon.ico", "electron/icon.ico"],
-    // .env carries DATABASE_URL + auth secrets for the packaged server;
-    // main.cjs loads it next to package.json.
-    [".env", ".env"],
   ];
+  // Secrets are NEVER bundled by default so the packaged app is safe to
+  // distribute. Set INCLUDE_ENV=1 to opt in (personal builds with cloud sync).
+  if (process.env.INCLUDE_ENV === "1") {
+    entries.push([".env", ".env"]);
+  }
   for (const [srcRel, destRel] of entries) {
     const src = path.join(root, srcRel);
     if (fs.existsSync(src)) cp(src, path.join(stageDir, destRel));
